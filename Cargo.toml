@@ -1,0 +1,8 @@
+[package]
+name = "linear-beaglebra"
+version = "0.1.0"
+authors = ["Kasper Rieder (CodingBeagle) <kasper.rie@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+float-cmp = "0.6.0"
