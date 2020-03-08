@@ -5,4 +5,8 @@ authors = ["Kasper Rieder (CodingBeagle) <kasper.rie@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+
+# The dev-dependencies section can be used for dependencies to crates only using during, for example
+# testing. These crates will NOT be propagated to other packages that depend on this package.
+[dev-dependencies]
 float-cmp = "0.6.0"

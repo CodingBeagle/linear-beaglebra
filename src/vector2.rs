@@ -14,31 +14,31 @@ use std::ops::{Add, Sub};
 // Currently the design of Vector2 is that they are immutable.
 // You instead modify them by performing operations on them which result in a new vector
 // TODO: Think about design implication of this. Good, bad??? what are pros and cons?
-struct Vector2 {
+pub struct Vector2 {
     pub x: f32,
     pub y: f32
 }
 
 impl Vector2 {
-    fn new(x: f32, y: f32) -> Vector2 {
+    pub fn new(x: f32, y: f32) -> Vector2 {
         Vector2 {
             x,
             y
         }
     }
 
-    fn length(self) -> f32 {
+    pub fn length(self) -> f32 {
         (self.x * self.x + self.y * self.y).sqrt()
     }
 
-    fn scalar_multiplication(self, scalar: f32) -> Vector2 {
+    pub fn scalar_multiplication(self, scalar: f32) -> Vector2 {
         Vector2 {
             x: self.x * scalar,
             y: self.y * scalar
         }
     }
 
-    fn dot_product(self, other: Self) -> f32 {
+    pub fn dot_product(self, other: Self) -> f32 {
         self.x * other.x + self.y * other.y
     }
 }
