@@ -1,5 +1,4 @@
 use std::fmt;
-use std::default;
 
 #[derive(Debug)]
 pub enum MatrixError {
