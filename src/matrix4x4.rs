@@ -11,6 +11,13 @@ pub struct Matrix4x4 {
     array: [f32; 16]
 }
 
+// LEARN: Default Trait in Rust
+// The "Default" trait can be implemented as a way to easily fall back to a default value for a struct and its members.
+// It can be used in two ways:
+// - By deriving the default trait on the struct itself. This works if all members of the struct implements Default themselves.
+// - By manually implementing the method default()
+// I manually implement the method default here
+// TODO: From what I understand, I don't actually have to implement Default here. Arrays should be able to be Default so long as they are under 32? in size and use Default types. 
 impl Default for Matrix4x4 {
     fn default() -> Self {
         Matrix4x4 {
