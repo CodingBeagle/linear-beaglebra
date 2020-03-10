@@ -38,7 +38,7 @@ impl Matrix4x4 {
             0.0, 0.0, 0.0, 1.0)
     }
 
-    pub fn getEntry(&self, row: usize, column: usize) -> Result<f32, MatrixError> {
+    pub fn get_entry(&self, row: usize, column: usize) -> Result<f32, MatrixError> {
         // REASONING: Error-Handling of expected possible bad input.
         // I return an error message that the client needs to handle.
         // The entire application using this library certainly shouldn't shut down simply
@@ -62,25 +62,25 @@ impl fmt::Debug for Matrix4x4 {
         let error_message = "Failed to read matrix entry on pretty print.";
 
         // TODO: Really wanna make this shorter and neater...
-        let m00 = self.getEntry(0, 0).expect(error_message);
-        let m01 = self.getEntry(0, 1).expect(error_message);
-        let m02 = self.getEntry(0, 2).expect(error_message);
-        let m03 = self.getEntry(0, 3).expect(error_message);
+        let m00 = self.get_entry(0, 0).expect(error_message);
+        let m01 = self.get_entry(0, 1).expect(error_message);
+        let m02 = self.get_entry(0, 2).expect(error_message);
+        let m03 = self.get_entry(0, 3).expect(error_message);
 
-        let m10 = self.getEntry(1, 0).expect(error_message);
-        let m11 = self.getEntry(1, 1).expect(error_message);
-        let m12 = self.getEntry(1, 2).expect(error_message);
-        let m13 = self.getEntry(1, 3).expect(error_message);
+        let m10 = self.get_entry(1, 0).expect(error_message);
+        let m11 = self.get_entry(1, 1).expect(error_message);
+        let m12 = self.get_entry(1, 2).expect(error_message);
+        let m13 = self.get_entry(1, 3).expect(error_message);
 
-        let m20 = self.getEntry(2, 0).expect(error_message);
-        let m21 = self.getEntry(2, 1).expect(error_message);
-        let m22 = self.getEntry(2, 2).expect(error_message);
-        let m23 = self.getEntry(2, 3).expect(error_message);
+        let m20 = self.get_entry(2, 0).expect(error_message);
+        let m21 = self.get_entry(2, 1).expect(error_message);
+        let m22 = self.get_entry(2, 2).expect(error_message);
+        let m23 = self.get_entry(2, 3).expect(error_message);
 
-        let m30 = self.getEntry(3, 0).expect(error_message);
-        let m31 = self.getEntry(3, 1).expect(error_message);
-        let m32 = self.getEntry(3, 2).expect(error_message);
-        let m33 = self.getEntry(3, 3).expect(error_message);
+        let m30 = self.get_entry(3, 0).expect(error_message);
+        let m31 = self.get_entry(3, 1).expect(error_message);
+        let m32 = self.get_entry(3, 2).expect(error_message);
+        let m33 = self.get_entry(3, 3).expect(error_message);
 
         // TODO: Can you call multiple write! macros per line instead of having all in one call??
         write!(f, "{},{},{},{}\n{},{},{},{}\n{},{},{},{}\n{},{},{},{}",
@@ -101,25 +101,25 @@ mod tests {
         let identity_matrix = Matrix4x4::identity();
 
         // Assert
-        assert_eq!(identity_matrix.getEntry(0,0).expect("Failed to get entry in matrix."), 1.0);
-        assert_eq!(identity_matrix.getEntry(1,1).expect("Failed to get entry in matrix."), 1.0);
-        assert_eq!(identity_matrix.getEntry(2,2).expect("Failed to get entry in matrix."), 1.0);
-        assert_eq!(identity_matrix.getEntry(3,3).expect("Failed to get entry in matrix."), 1.0);
+        assert_eq!(identity_matrix.get_entry(0,0).expect("Failed to get entry in matrix."), 1.0);
+        assert_eq!(identity_matrix.get_entry(1,1).expect("Failed to get entry in matrix."), 1.0);
+        assert_eq!(identity_matrix.get_entry(2,2).expect("Failed to get entry in matrix."), 1.0);
+        assert_eq!(identity_matrix.get_entry(3,3).expect("Failed to get entry in matrix."), 1.0);
 
-        assert_eq!(identity_matrix.getEntry(0,1).expect("Failed to get entry in matrix."), 0.0);
-        assert_eq!(identity_matrix.getEntry(0,2).expect("Failed to get entry in matrix."), 0.0);
-        assert_eq!(identity_matrix.getEntry(0,3).expect("Failed to get entry in matrix."), 0.0);
+        assert_eq!(identity_matrix.get_entry(0,1).expect("Failed to get entry in matrix."), 0.0);
+        assert_eq!(identity_matrix.get_entry(0,2).expect("Failed to get entry in matrix."), 0.0);
+        assert_eq!(identity_matrix.get_entry(0,3).expect("Failed to get entry in matrix."), 0.0);
 
-        assert_eq!(identity_matrix.getEntry(1,0).expect("Failed to get entry in matrix."), 0.0);
-        assert_eq!(identity_matrix.getEntry(1,2).expect("Failed to get entry in matrix."), 0.0);
-        assert_eq!(identity_matrix.getEntry(1,3).expect("Failed to get entry in matrix."), 0.0);
+        assert_eq!(identity_matrix.get_entry(1,0).expect("Failed to get entry in matrix."), 0.0);
+        assert_eq!(identity_matrix.get_entry(1,2).expect("Failed to get entry in matrix."), 0.0);
+        assert_eq!(identity_matrix.get_entry(1,3).expect("Failed to get entry in matrix."), 0.0);
 
-        assert_eq!(identity_matrix.getEntry(2,0).expect("Failed to get entry in matrix."), 0.0);
-        assert_eq!(identity_matrix.getEntry(2,1).expect("Failed to get entry in matrix."), 0.0);
-        assert_eq!(identity_matrix.getEntry(2,3).expect("Failed to get entry in matrix."), 0.0);
+        assert_eq!(identity_matrix.get_entry(2,0).expect("Failed to get entry in matrix."), 0.0);
+        assert_eq!(identity_matrix.get_entry(2,1).expect("Failed to get entry in matrix."), 0.0);
+        assert_eq!(identity_matrix.get_entry(2,3).expect("Failed to get entry in matrix."), 0.0);
 
-        assert_eq!(identity_matrix.getEntry(3,0).expect("Failed to get entry in matrix."), 0.0);
-        assert_eq!(identity_matrix.getEntry(3,1).expect("Failed to get entry in matrix."), 0.0);
-        assert_eq!(identity_matrix.getEntry(3,2).expect("Failed to get entry in matrix."), 0.0);
+        assert_eq!(identity_matrix.get_entry(3,0).expect("Failed to get entry in matrix."), 0.0);
+        assert_eq!(identity_matrix.get_entry(3,1).expect("Failed to get entry in matrix."), 0.0);
+        assert_eq!(identity_matrix.get_entry(3,2).expect("Failed to get entry in matrix."), 0.0);
     }
 }
