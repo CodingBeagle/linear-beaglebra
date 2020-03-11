@@ -152,6 +152,7 @@ mod tests {
         let multiplication_result = matrix_a.mul(matrix_b);
 
         // Assert
+        // TODO: Do actual proper assertion here
         println!("{:?}", multiplication_result);
     }
 
