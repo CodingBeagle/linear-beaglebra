@@ -1,9 +1,7 @@
-use std::fmt;
+use crate::vector2::{Vector2};
 
-#[derive(Debug)]
-pub enum MatrixError {
-    InvalidInput(String)
-}
+use std::fmt;
+use std::ops::{Index};
 
 pub struct Matrix4x4 {
     // The matrix is represented as a one-dimensional arrray in column-major order
@@ -21,8 +19,39 @@ pub struct Matrix4x4 {
 impl Default for Matrix4x4 {
     fn default() -> Self {
         Matrix4x4 {
-            array: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            array: [
+                0.0, 0.0, 0.0, 0.0, 
+                0.0, 0.0, 0.0, 0.0, 
+                0.0, 0.0, 0.0, 0.0, 
+                0.0, 0.0, 0.0, 0.0 ]
         }
+    }
+}
+
+impl Index<[usize; 2]> for Matrix4x4 {
+    // TODO: Gotta learn exactly what this Output pattern is about when implementing some traits..
+    type Output = f32;
+
+    fn index(&self, index: [usize; 2]) -> &f32 {
+        let requested_column = index[1];
+        let requested_row = index[0];
+
+        // LEARN: I actually panic in library code here.
+        // Reason: Providing an index outside the range of the 4x4 matrix represents a flat out incorrect call to this indexing method.
+        // The client is violating the preconditions of the function, and so I will refuse to even accept the input as it represents a bug in the calling code.
+        // This is NOT something that should occur run-time on the client-side.
+        // LEARN: Think about pros / cons about this in terms of users using the library... and what good alternatives could be.
+        // Definite pro: Client code gets to write quick, short and to-the-point indexing code that doesn't have to deal with a Result and unpacking it, etc, which can very quickly write long hard-to-read code
+        // If you're dealing with matrix math.
+        if requested_column > 3 {
+            panic!("You requested column {}, but the max allowed index is 3!", requested_column);
+        }
+
+        if requested_row > 3 {
+            panic!("You requested row {}, but the max allowed index is 3!", requested_column);
+        }
+
+        &self.array[ requested_column * 4 + requested_row  ]
     }
 }
 
@@ -33,7 +62,8 @@ impl Matrix4x4 {
         m20: f32, m21: f32, m22: f32, m23: f32,
         m30: f32, m31: f32, m32: f32, m33: f32) -> Matrix4x4 {
             Matrix4x4 {
-                array: [ m00, m10, m20, m30, m01, m11, m21, m31, m02, m12, m22, m32, m03, m13, m23, m33 ]
+                array: [ 
+                    m00, m10, m20, m30, m01, m11, m21, m31, m02, m12, m22, m32, m03, m13, m23, m33 ]
             }
     }
 
@@ -45,22 +75,44 @@ impl Matrix4x4 {
             0.0, 0.0, 0.0, 1.0)
     }
 
-    pub fn get_entry(&self, row: usize, column: usize) -> Result<f32, MatrixError> {
-        // REASONING: Error-Handling of expected possible bad input.
-        // I return an error message that the client needs to handle.
-        // The entire application using this library certainly shouldn't shut down simply
-        // Because of bad input to this function. The client should have a chance to do its own thing.
-        if row > 3 {
-            return Err(MatrixError::InvalidInput(String::from("Max possible row is 3.")));
-        }
+    pub fn translate(&self, vector2: Vector2) -> Matrix4x4 {
+        let translate_matrix = Matrix4x4::new(
+            1.0, 0.0, 0.0, vector2.x, 
+            0.0, 1.0, 0.0, vector2.y, 
+            0.0, 0.0, 1.0, 0.0, 
+            0.0, 0.0, 0.0, 1.0);
 
-        if column > 3 {
-            return Err(MatrixError::InvalidInput(String::from("Max possible row is 3.")));
-        }
+        translate_matrix
+    }
 
-        // LEARN: In order to index arrays in Rust, you need usize. Find out why.
-        let array_index: usize = (column * 4) + row;
-        Ok(self.array[array_index])
+    pub fn mul(&self, matrix4x4: Matrix4x4) -> Matrix4x4 {
+        let m00 = self[[0, 0]] * matrix4x4[[0, 0]] + self[[0, 1]] * matrix4x4[[1, 0]] + self[[0, 2]] * matrix4x4[[2, 0]] + self[[0, 3]] * matrix4x4[[3, 0]];
+        let m01 = self[[0, 0]] * matrix4x4[[0, 1]] + self[[0, 1]] * matrix4x4[[1, 1]] + self[[0, 2]] * matrix4x4[[2, 1]] + self[[0, 3]] * matrix4x4[[3, 1]];
+        let m02 = self[[0, 0]] * matrix4x4[[0, 2]] + self[[0, 1]] * matrix4x4[[1, 2]] + self[[0, 2]] * matrix4x4[[2, 2]] + self[[0, 3]] * matrix4x4[[3, 2]];
+        let m03 = self[[0, 0]] * matrix4x4[[0, 3]] + self[[0, 1]] * matrix4x4[[1, 3]] + self[[0, 2]] * matrix4x4[[2, 3]] + self[[0, 3]] * matrix4x4[[3, 3]];
+
+        let m10 = self[[1, 0]] * matrix4x4[[0, 0]] + self[[1, 1]] * matrix4x4[[1, 0]] + self[[1, 2]] * matrix4x4[[2, 0]] + self[[1, 3]] * matrix4x4[[3, 0]];
+        let m11 = self[[1, 0]] * matrix4x4[[0, 1]] + self[[1, 1]] * matrix4x4[[1, 1]] + self[[1, 2]] * matrix4x4[[2, 1]] + self[[1, 3]] * matrix4x4[[3, 1]];
+        let m12 = self[[1, 0]] * matrix4x4[[0, 2]] + self[[1, 1]] * matrix4x4[[1, 2]] + self[[1, 2]] * matrix4x4[[2, 2]] + self[[1, 3]] * matrix4x4[[3, 2]];
+        let m13 = self[[1, 0]] * matrix4x4[[0, 3]] + self[[1, 1]] * matrix4x4[[1, 3]] + self[[1, 2]] * matrix4x4[[2, 3]] + self[[1, 3]] * matrix4x4[[3, 3]];
+
+        let m20 = self[[2, 0]] * matrix4x4[[0, 0]] + self[[2, 1]] * matrix4x4[[1, 0]] + self[[2, 2]] * matrix4x4[[2, 0]] + self[[2, 3]] * matrix4x4[[3, 0]];
+        let m21 = self[[2, 0]] * matrix4x4[[0, 1]] + self[[2, 1]] * matrix4x4[[1, 1]] + self[[2, 2]] * matrix4x4[[2, 1]] + self[[2, 3]] * matrix4x4[[3, 1]];
+        let m22 = self[[2, 0]] * matrix4x4[[0, 2]] + self[[2, 1]] * matrix4x4[[1, 2]] + self[[2, 2]] * matrix4x4[[2, 2]] + self[[2, 3]] * matrix4x4[[3, 2]];
+        let m23 = self[[2, 0]] * matrix4x4[[0, 3]] + self[[2, 1]] * matrix4x4[[1, 3]] + self[[2, 2]] * matrix4x4[[2, 3]] + self[[2, 3]] * matrix4x4[[3, 3]];
+
+        let m30 = self[[3, 0]] * matrix4x4[[0, 0]] + self[[3, 1]] * matrix4x4[[1, 0]] + self[[3, 2]] * matrix4x4[[2, 0]] + self[[3, 3]] * matrix4x4[[3, 0]];
+        let m31 = self[[3, 0]] * matrix4x4[[0, 1]] + self[[3, 1]] * matrix4x4[[1, 1]] + self[[3, 2]] * matrix4x4[[2, 1]] + self[[3, 3]] * matrix4x4[[3, 1]];
+        let m32 = self[[3, 0]] * matrix4x4[[0, 2]] + self[[3, 1]] * matrix4x4[[1, 2]] + self[[3, 2]] * matrix4x4[[2, 2]] + self[[3, 3]] * matrix4x4[[3, 2]];
+        let m33 = self[[3, 0]] * matrix4x4[[0, 3]] + self[[3, 1]] * matrix4x4[[1, 3]] + self[[3, 2]] * matrix4x4[[2, 3]] + self[[3, 3]] * matrix4x4[[3, 3]];
+
+        let concatenated_matrix = Matrix4x4::new(
+            m00, m01, m02, m03, 
+            m10, m11, m12, m13, 
+            m20, m21, m22, m23, 
+            m30, m31, m32, m33);
+
+        concatenated_matrix
     }
 }
 
@@ -68,33 +120,12 @@ impl fmt::Debug for Matrix4x4 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let error_message = "Failed to read matrix entry on pretty print.";
 
-        // TODO: Really wanna make this shorter and neater...
-        let m00 = self.get_entry(0, 0).expect(error_message);
-        let m01 = self.get_entry(0, 1).expect(error_message);
-        let m02 = self.get_entry(0, 2).expect(error_message);
-        let m03 = self.get_entry(0, 3).expect(error_message);
-
-        let m10 = self.get_entry(1, 0).expect(error_message);
-        let m11 = self.get_entry(1, 1).expect(error_message);
-        let m12 = self.get_entry(1, 2).expect(error_message);
-        let m13 = self.get_entry(1, 3).expect(error_message);
-
-        let m20 = self.get_entry(2, 0).expect(error_message);
-        let m21 = self.get_entry(2, 1).expect(error_message);
-        let m22 = self.get_entry(2, 2).expect(error_message);
-        let m23 = self.get_entry(2, 3).expect(error_message);
-
-        let m30 = self.get_entry(3, 0).expect(error_message);
-        let m31 = self.get_entry(3, 1).expect(error_message);
-        let m32 = self.get_entry(3, 2).expect(error_message);
-        let m33 = self.get_entry(3, 3).expect(error_message);
-
         // TODO: Can you call multiple write! macros per line instead of having all in one call??
         write!(f, "{},{},{},{}\n{},{},{},{}\n{},{},{},{}\n{},{},{},{}",
-                m00, m01, m02, m03,
-                m10, m11, m12, m13,
-                m20, m21, m22, m23,
-                m30, m31, m32, m33,)
+                self[[0, 0]], self[[0, 1]], self[[0, 2]], self[[0, 3]],
+                self[[1, 0]], self[[1, 1]], self[[1, 2]], self[[1, 3]],
+                self[[2, 0]], self[[2, 1]], self[[2, 2]], self[[2, 3]],
+                self[[3, 0]], self[[3, 1]], self[[3, 2]], self[[3, 3]])
     }
 }
 
@@ -103,30 +134,85 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_identy_matrix() {
-        // Arrange & Act
-        let identity_matrix = Matrix4x4::identity();
+    fn test_matrix_mul() {
+        // Arrange
+        let matrix_a = Matrix4x4::new(
+            1.0, 2.0, 3.0, 4.0, 
+            5.0, 6.0, 7.0, 8.0, 
+            9.0, 10.0, 11.0, 12.0, 
+            13.0, 14.0, 15.0, 16.0);
+
+        let matrix_b = Matrix4x4::new(
+            16.0, 15.0, 14.0, 13.0, 
+            12.0, 11.0, 10.0, 9.0, 
+            8.0, 7.0, 6.0, 5.0, 
+            4.0, 3.0, 2.0, 1.0);
+
+        // Act
+        let multiplication_result = matrix_a.mul(matrix_b);
 
         // Assert
-        assert_eq!(identity_matrix.get_entry(0,0).expect("Failed to get entry in matrix."), 1.0);
-        assert_eq!(identity_matrix.get_entry(1,1).expect("Failed to get entry in matrix."), 1.0);
-        assert_eq!(identity_matrix.get_entry(2,2).expect("Failed to get entry in matrix."), 1.0);
-        assert_eq!(identity_matrix.get_entry(3,3).expect("Failed to get entry in matrix."), 1.0);
+        println!("{:?}", multiplication_result);
+    }
 
-        assert_eq!(identity_matrix.get_entry(0,1).expect("Failed to get entry in matrix."), 0.0);
-        assert_eq!(identity_matrix.get_entry(0,2).expect("Failed to get entry in matrix."), 0.0);
-        assert_eq!(identity_matrix.get_entry(0,3).expect("Failed to get entry in matrix."), 0.0);
+    #[test]
+    fn test_pretty_print() {
+        // Arrange
+        let matrix_a = Matrix4x4::identity();
 
-        assert_eq!(identity_matrix.get_entry(1,0).expect("Failed to get entry in matrix."), 0.0);
-        assert_eq!(identity_matrix.get_entry(1,2).expect("Failed to get entry in matrix."), 0.0);
-        assert_eq!(identity_matrix.get_entry(1,3).expect("Failed to get entry in matrix."), 0.0);
+        // Act
+        println!("{:?}", matrix_a);
+    }
 
-        assert_eq!(identity_matrix.get_entry(2,0).expect("Failed to get entry in matrix."), 0.0);
-        assert_eq!(identity_matrix.get_entry(2,1).expect("Failed to get entry in matrix."), 0.0);
-        assert_eq!(identity_matrix.get_entry(2,3).expect("Failed to get entry in matrix."), 0.0);
+    #[test]
+    fn test_indexing() {
+        // Arrange
+        let matrix_a = Matrix4x4::new(
+            1.0,  2.0,   3.0,    4.0, 
+            5.0,  6.0,   7.0,    8.0, 
+            9.0,  10.0,  11.0,   12.0, 
+            13.0, 14.0,  15.0,   16.0);
 
-        assert_eq!(identity_matrix.get_entry(3,0).expect("Failed to get entry in matrix."), 0.0);
-        assert_eq!(identity_matrix.get_entry(3,1).expect("Failed to get entry in matrix."), 0.0);
-        assert_eq!(identity_matrix.get_entry(3,2).expect("Failed to get entry in matrix."), 0.0);
+        // Act
+        let m00 = matrix_a[[0, 0]];
+        let m10 = matrix_a[[1, 0]];
+        let m20 = matrix_a[[2, 0]];
+        let m30 = matrix_a[[3, 0]];
+
+        let m01 = matrix_a[[0, 1]];
+        let m11 = matrix_a[[1, 1]];
+        let m21 = matrix_a[[2, 1]];
+        let m31 = matrix_a[[3, 1]];
+
+        let m02 = matrix_a[[0, 2]];
+        let m12 = matrix_a[[1, 2]];
+        let m22 = matrix_a[[2, 2]];
+        let m32 = matrix_a[[3, 2]];
+
+        let m03 = matrix_a[[0, 3]];
+        let m13 = matrix_a[[1, 3]];
+        let m23 = matrix_a[[2, 3]];
+        let m33 = matrix_a[[3, 3]];
+
+        // Assert
+        assert_eq!(m00, 1.0);
+        assert_eq!(m10, 5.0);
+        assert_eq!(m20, 9.0);
+        assert_eq!(m30, 13.0);
+
+        assert_eq!(m01, 2.0);
+        assert_eq!(m11, 6.0);
+        assert_eq!(m21, 10.0);
+        assert_eq!(m31, 14.0);
+
+        assert_eq!(m02, 3.0);
+        assert_eq!(m12, 7.0);
+        assert_eq!(m22, 11.0);
+        assert_eq!(m32, 15.0);
+
+        assert_eq!(m03, 4.0);
+        assert_eq!(m13, 8.0);
+        assert_eq!(m23, 12.0);
+        assert_eq!(m33, 16.0);
     }
 }

@@ -17,7 +17,11 @@
             "command": "cargo build",
             "problemMatcher": [
                 "$rustc"
-            ]
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
         {
             "label": "test",
