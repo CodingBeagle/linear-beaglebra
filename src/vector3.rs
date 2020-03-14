@@ -71,6 +71,17 @@ mod tests {
     use float_cmp::approx_eq;
 
     #[test]
+    fn test_construction() {
+        // Act
+        let vector_a = Vector3::new(1.0, 2.0, 3.0);
+
+        // Assert
+        assert_eq!(vector_a.x, 1.0);
+        assert_eq!(vector_a.y, 2.0);
+        assert_eq!(vector_a.z, 3.0);
+    }
+
+    #[test]
     fn test_from_vector2() {
         // Arrange
         let vector_a = Vector2::new(1.0, 2.0);
