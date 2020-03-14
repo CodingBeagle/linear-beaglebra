@@ -78,14 +78,27 @@ impl Matrix4x4 {
     pub fn translate(&self, vector2: Vector2) -> Matrix4x4 {
         let translate_matrix = Matrix4x4::new(
             1.0, 0.0, 0.0, vector2.x, 
-            0.0, 1.0, 0.0, vector2.y, 
-            0.0, 0.0, 1.0, 0.0, 
+            0.0, 1.0, 0.0, vector2.y,
+            0.0, 0.0, 1.0, 0.0,
             0.0, 0.0, 0.0, 1.0);
 
         translate_matrix
     }
 
+    pub fn orthographic(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Matrix4x4 {
+        let orthographic_projection = Matrix4x4::new(
+            2.0 / (right - left), 0.0,                0.0,              -((right + left)/(right - left)), 
+            0.0,                  2.0/(top - bottom), 0.0,              -((top + bottom)/(top - bottom)), 
+            0.0,                  0.0,                2.0/(far - near), -((far + near)/(far - near)), 
+            0.0,                  0.0,                0.0,              1.0);
+
+        orthographic_projection
+    }
+
     pub fn mul(&self, matrix4x4: Matrix4x4) -> Matrix4x4 {
+        // TODO: Now I don't know much about SIMD instructions yet, but it might have something to do with doing calculations in single instructions...
+        // That is definitely not what I'm doing here (I think???? Maybe???). Have to read up on all that at some point.
+        // For now I have bigger fish to fry.
         let m00 = self[[0, 0]] * matrix4x4[[0, 0]] + self[[0, 1]] * matrix4x4[[1, 0]] + self[[0, 2]] * matrix4x4[[2, 0]] + self[[0, 3]] * matrix4x4[[3, 0]];
         let m01 = self[[0, 0]] * matrix4x4[[0, 1]] + self[[0, 1]] * matrix4x4[[1, 1]] + self[[0, 2]] * matrix4x4[[2, 1]] + self[[0, 3]] * matrix4x4[[3, 1]];
         let m02 = self[[0, 0]] * matrix4x4[[0, 2]] + self[[0, 1]] * matrix4x4[[1, 2]] + self[[0, 2]] * matrix4x4[[2, 2]] + self[[0, 3]] * matrix4x4[[3, 2]];
@@ -118,8 +131,6 @@ impl Matrix4x4 {
 
 impl fmt::Debug for Matrix4x4 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let error_message = "Failed to read matrix entry on pretty print.";
-
         // TODO: Can you call multiple write! macros per line instead of having all in one call??
         write!(f, "{},{},{},{}\n{},{},{},{}\n{},{},{},{}\n{},{},{},{}",
                 self[[0, 0]], self[[0, 1]], self[[0, 2]], self[[0, 3]],
@@ -132,6 +143,36 @@ impl fmt::Debug for Matrix4x4 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use float_cmp::approx_eq;
+
+    #[test]
+    fn test_orthographic_projection_construction() {
+        // Act
+        let orthographic_projection = Matrix4x4::orthographic(0.0, 1024.0, 768.0, 0.0, -1.0, 1.0);
+
+        println!("{:?}", orthographic_projection);
+
+        // Assert
+        assert!( approx_eq!(f32, orthographic_projection[[0, 0]], 0.002, epsilon = 0.0001) );
+        assert_eq!( orthographic_projection[[0, 1]], 0.0 );
+        assert_eq!( orthographic_projection[[0, 2]], 0.0 );
+        assert_eq!( orthographic_projection[[0, 3]], -1.0 );
+
+        assert_eq!( orthographic_projection[[1, 0]], 0.0 );
+        assert!( approx_eq!(f32, orthographic_projection[[1, 1]], -0.003, epsilon = 0.0004) );
+        assert_eq!( orthographic_projection[[1, 2]], 0.0 );
+        assert_eq!( orthographic_projection[[1, 3]], 1.0 );
+
+        assert_eq!( orthographic_projection[[2, 0]], 0.0 );
+        assert_eq!( orthographic_projection[[2, 1]], 0.0 );
+        assert_eq!( orthographic_projection[[2, 2]], 1.0 );
+        assert_eq!( orthographic_projection[[2, 3]], 0.0 );
+
+        assert_eq!( orthographic_projection[[3, 0]], 0.0 );
+        assert_eq!( orthographic_projection[[3, 1]], 0.0 );
+        assert_eq!( orthographic_projection[[3, 2]], 0.0 );
+        assert_eq!( orthographic_projection[[3, 3]], 1.0 );
+    }
 
     #[test]
     fn test_matrix_mul() {
