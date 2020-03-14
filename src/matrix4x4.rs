@@ -67,6 +67,10 @@ impl Matrix4x4 {
             }
     }
 
+    pub fn first(&self) -> &f32 {
+        &self.array[0]
+    }
+
     pub fn identity() -> Matrix4x4 {
         Matrix4x4::new(
             1.0, 0.0, 0.0, 0.0,
@@ -75,6 +79,8 @@ impl Matrix4x4 {
             0.0, 0.0, 0.0, 1.0)
     }
 
+    // TODO: Should take a reference to a vector2 instead of moving it
+    // TODO: Need to write test for this method
     pub fn translate(&self, vector2: Vector2) -> Matrix4x4 {
         let translate_matrix = Matrix4x4::new(
             1.0, 0.0, 0.0, vector2.x, 
@@ -82,7 +88,7 @@ impl Matrix4x4 {
             0.0, 0.0, 1.0, 0.0,
             0.0, 0.0, 0.0, 1.0);
 
-        translate_matrix
+        self.mul(translate_matrix)
     }
 
     pub fn orthographic(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Matrix4x4 {
@@ -95,6 +101,7 @@ impl Matrix4x4 {
         orthographic_projection
     }
 
+    // TODO: Should take a reference to another matrix instead of moving it
     pub fn mul(&self, matrix4x4: Matrix4x4) -> Matrix4x4 {
         // TODO: Now I don't know much about SIMD instructions yet, but it might have something to do with doing calculations in single instructions...
         // That is definitely not what I'm doing here (I think???? Maybe???). Have to read up on all that at some point.
