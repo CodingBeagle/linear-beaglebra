@@ -91,6 +91,29 @@ impl Matrix4x4 {
         self.mul(translate_matrix)
     }
 
+    // TODO: Only implemented roll axis rotation for this eulear angle rotation
+    pub fn rotate(&self, head: f32, pitch: f32, roll: f32) -> Matrix4x4 {
+        let roll_matrix = Matrix4x4::new(
+            roll.cos(), -roll.sin(), 0.0, 0.0, 
+            roll.sin(), roll.cos(), 0.0, 0.0, 
+            0.0, 0.0, 1.0, 0.0, 
+            0.0, 0.0, 0.0, 1.0
+        );
+
+        self.mul(roll_matrix)
+    }
+
+    pub fn scale(&self, x: f32, y: f32, z: f32) -> Matrix4x4 {
+        let scale_matrix = Matrix4x4::new(
+            x, 0.0, 0.0, 0.0, 
+            0.0, y, 0.0, 0.0,
+            0.0, 0.0, z, 0.0, 
+            0.0, 0.0, 0.0, 1.0
+        );
+
+        self.mul(scale_matrix)
+    }
+
     pub fn orthographic(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Matrix4x4 {
         let orthographic_projection = Matrix4x4::new(
             2.0 / (right - left), 0.0,                0.0,              -((right + left)/(right - left)), 
