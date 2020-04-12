@@ -81,7 +81,7 @@ impl Matrix4x4 {
 
     // TODO: Should take a reference to a vector2 instead of moving it
     // TODO: Need to write test for this method
-    pub fn translate(&self, vector2: Vector2) -> Matrix4x4 {
+    pub fn translate(&self, vector2: Vector2<f32>) -> Matrix4x4 {
         let translate_matrix = Matrix4x4::new(
             1.0, 0.0, 0.0, vector2.x, 
             0.0, 1.0, 0.0, vector2.y,

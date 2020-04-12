@@ -1,14 +1,26 @@
 use crate::vector2::Vector2;
-use std::ops::{Add, Sub};
+use std::ops::{Add, Sub, Mul};
 
-pub struct Vector3 {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32
+use crate::sqrt_trait::Sqrt;
+
+pub struct Vector3<T> where T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Copy {
+    pub x: T,
+    pub y: T,
+    pub z: T
 }
 
-impl Vector3 {
-    pub fn new(x: f32, y: f32, z: f32) -> Vector3 {
+impl<T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Copy + Default> Vector3<T> {
+    pub fn from_vector2(vector2: Vector2<T>) -> Vector3<T> {
+        Vector3::<T> {
+            x: vector2.x,
+            y: vector2.y,
+            z: T::default()
+        }
+    }
+}
+
+impl<T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Copy> Vector3<T> {
+    pub fn new(x: T, y: T, z: T) -> Vector3<T> {
         Vector3 {
             x,
             y,
@@ -16,19 +28,7 @@ impl Vector3 {
         }
     }
 
-    pub fn from_vector2(vector2: Vector2) -> Vector3 {
-        Vector3 {
-            x: vector2.x,
-            y: vector2.y,
-            z: 0.0
-        }
-    }
-
-    pub fn length(self) -> f32 {
-        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
-    }
-
-    pub fn scalar_multiplication(self, scalar: f32) -> Self {
+    pub fn scalar_multiplication(self, scalar: T) -> Self {
         Vector3 {
             x: self.x * scalar,
             y: self.y * scalar,
@@ -36,12 +36,18 @@ impl Vector3 {
         }
     }
 
-    pub fn dot_product(self, other: Self) -> f32 {
+    pub fn dot_product(self, other: Self) -> T {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 }
 
-impl Add for Vector3 {
+impl<T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Copy + Sqrt> Vector3<T> {
+    pub fn length(self) -> T {
+        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+    }
+}
+
+impl<T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Copy> Add for Vector3<T> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
@@ -53,10 +59,10 @@ impl Add for Vector3 {
     }
 }
 
-impl Sub for Vector3 {
+impl<T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Copy> Sub for Vector3<T> {
     type Output = Self;
 
-    fn sub(self, other: Vector3) -> Self {
+    fn sub(self, other: Vector3<T>) -> Self {
         Vector3 {
             x: self.x - other.x,
             y: self.y - other.y,
@@ -73,7 +79,7 @@ mod tests {
     #[test]
     fn test_construction() {
         // Act
-        let vector_a = Vector3::new(1.0, 2.0, 3.0);
+        let vector_a = Vector3::<f64>::new(1.0, 2.0, 3.0);
 
         // Assert
         assert_eq!(vector_a.x, 1.0);
@@ -84,7 +90,7 @@ mod tests {
     #[test]
     fn test_from_vector2() {
         // Arrange
-        let vector_a = Vector2::new(1.0, 2.0);
+        let vector_a = Vector2::<f64>::new(1.0, 2.0);
 
         // Act
         let constructed_vector3 = Vector3::from_vector2(vector_a);
@@ -98,20 +104,20 @@ mod tests {
     #[test]
     fn test_length() {
         // Arrange
-        let vector_a = Vector3::new(1.0, 2.0, 3.0);
+        let vector_a = Vector3::<f64>::new(1.0, 2.0, 3.0);
 
         // Act
         let vector_length = vector_a.length();
 
         // Assert
-        assert!( approx_eq!(f32, vector_length, 3.74, epsilon = 0.01) );
+        assert!( approx_eq!(f64, vector_length, 3.74, epsilon = 0.01) );
     }
 
     #[test]
     fn test_dot_product() {
         // Arrange
-        let vector_a = Vector3::new(1.0, 2.0, 1.0);
-        let vector_b = Vector3::new(2.0, 1.0, 3.0);
+        let vector_a = Vector3::<f64>::new(1.0, 2.0, 1.0);
+        let vector_b = Vector3::<f64>::new(2.0, 1.0, 3.0);
 
         // Act
         let dot_product = vector_a.dot_product(vector_b);
@@ -123,8 +129,8 @@ mod tests {
     #[test]
     fn test_scalar_multiplication() {
         // Arrange
-        let vector_a = Vector3::new(2.0, 3.0, 4.0);
-        let scalar: f32 = 2.0;
+        let vector_a = Vector3::<f64>::new(2.0, 3.0, 4.0);
+        let scalar = 2.0;
 
         // Act
         let scalar_multiplication_result = vector_a.scalar_multiplication(scalar);
@@ -138,8 +144,8 @@ mod tests {
     #[test]
     fn test_add() {
         // Arrange
-        let vector_a = Vector3::new(1.0, 2.0, 3.0);
-        let vector_b = Vector3::new(2.0, 3.0, 4.0);        
+        let vector_a = Vector3::<f64>::new(1.0, 2.0, 3.0);
+        let vector_b = Vector3::<f64>::new(2.0, 3.0, 4.0);        
 
         // Act
         let addition_result = vector_a + vector_b;
@@ -153,8 +159,8 @@ mod tests {
     #[test]
     fn test_subtraction() {
         // Arrange
-        let vector_a = Vector3::new(2.0, 3.0, 4.0);
-        let vector_b = Vector3::new(2.0, 1.0, 3.0);
+        let vector_a = Vector3::<f64>::new(2.0, 3.0, 4.0);
+        let vector_b = Vector3::<f64>::new(2.0, 1.0, 3.0);
 
         // Act
         let subtraction_result = vector_a - vector_b;

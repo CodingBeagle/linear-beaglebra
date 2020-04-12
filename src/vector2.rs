@@ -9,42 +9,45 @@
 // For example, the "+" operator is backed by the .Add method of the Add trait.
 // Notice that this also means that operator overloading can only happen on operators backed by traits.
 // It's also not possible to create new operators.
-use std::ops::{Add, Sub};
+use std::ops::{Add, Sub, Mul};
+
+use crate::sqrt_trait::Sqrt;
 
 // Currently the design of Vector2 is that they are immutable.
 // You instead modify them by performing operations on them which result in a new vector
 // TODO: Think about design implication of this. Good, bad??? what are pros and cons?
-pub struct Vector2 {
-    pub x: f32,
-    pub y: f32
+pub struct Vector2<T> where T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Copy {
+    pub x: T,
+    pub y: T
 }
 
-impl Vector2 {
-    pub fn new(x: f32, y: f32) -> Vector2 {
-        Vector2 {
+impl<T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Copy> Vector2<T> {
+    pub fn new(x: T, y: T) -> Vector2<T> {
+        Vector2::<T> {
             x,
             y
         }
     }
 
-    pub fn length(self) -> f32 {
-        (self.x * self.x + self.y * self.y).sqrt()
-    }
-
-    pub fn scalar_multiplication(self, scalar: f32) -> Vector2 {
+    pub fn scalar_multiplication(self, scalar: T) -> Vector2<T> {
         Vector2 {
             x: self.x * scalar,
             y: self.y * scalar
         }
     }
 
-    pub fn dot_product(self, other: Self) -> f32 {
+    pub fn dot_product(self, other: Self) -> T {
         self.x * other.x + self.y * other.y
     }
 }
 
-impl Add for Vector2 {
-    // TODO: What is "Self"??
+impl<T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Sqrt + Copy> Vector2<T> {
+    pub fn length(self) -> T {
+        (self.x * self.x + self.y * self.y).sqrt()
+    }
+}
+
+impl<T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Copy> Add for Vector2<T> {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
@@ -55,7 +58,7 @@ impl Add for Vector2 {
     }
 }
 
-impl Sub for Vector2 {
+impl<T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Copy> Sub for Vector2<T> {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
