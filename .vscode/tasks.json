@@ -27,7 +27,7 @@
             "label": "test",
             "group": "test",
             "type": "shell",
-            "command": "cargo test"
+            "command": "cargo test -- --nocapture"
         }
     ]
 }
