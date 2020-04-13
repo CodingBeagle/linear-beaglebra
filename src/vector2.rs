@@ -13,9 +13,12 @@ use std::ops::{Add, Sub, Mul};
 
 use crate::sqrt_trait::Sqrt;
 
-// Currently the design of Vector2 is that they are immutable.
-// You instead modify them by performing operations on them which result in a new vector
-// TODO: Think about design implication of this. Good, bad??? what are pros and cons?
+// By default, variable bindings have "move semantics".
+// For our Vectors, this means that if we assign one to a variable "a" and then afterwards assign
+// It to a variable "b", it will have "moved out of a and into b", meaning variable a can no longer be used.
+// I would like Vectors to have "copy semantics", meaning that the values of the vector can simply be copied at bit level.
+// NOTICE: Using the derive strategy for making a type copyable means that a trait bound is put on "T" for Copy and Clone.
+#[derive(Copy, Clone)]
 pub struct Vector2<T> where T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Copy {
     pub x: T,
     pub y: T
